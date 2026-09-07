@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>BRM5 Flight Operations Planner</title>
+  <meta name="description" content="Blackhawk Rescue Mission 5 flight planning and mission log tool.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <div class="roundel">5</div>
+    <div><strong>BRM5 // FLIGHT OPS</strong><span>TACTICAL AVIATION PLANNING SYSTEM</span></div>
+  </div>
+  <div class="top-status"><span class="dot"></span> LOCAL // OFFLINE STORAGE</div>
+</header>
+
+<main class="layout">
+  <aside class="sidebar">
+    <button class="nav active" data-section="planner">FLIGHT PLANNER</button>
+    <button class="nav" data-section="saved">SAVED PLANS <b id="savedCount">0</b></button>
+    <button class="nav" data-section="brief">MISSION BRIEF</button>
+    <button class="nav" data-section="settings">SETTINGS</button>
+
+    <div class="sidebar-bottom">
+      <div class="small-label">AIRCRAFT</div>
+      <select id="aircraft">
+        <option>UH-60M Black Hawk</option>
+        <option>UH-60L Black Hawk</option>
+        <option>MH-60M Black Hawk</option>
+      </select>
+      <div class="small-label">CALLSIGN</div>
+      <input id="callsign" value="RAVEN 11" maxlength="24">
+    </div>
+  </aside>
+
+  <section class="content">
+    <section id="planner" class="section active">
+      <div class="page-head">
+        <div><div class="eyebrow">MISSION PLANNING / 01</div><h1>Flight Planner</h1></div>
+        <div class="actions"><button id="newPlan" class="btn ghost">NEW</button><button id="savePlan" class="btn primary">SAVE FLIGHT PLAN</button></div>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-title">MISSION DATA</div>
+          <div class="form-grid">
+            <label>MISSION NAME<input id="missionName" placeholder="e.g. NIGHT HAWK"></label>
+            <label>DATE / TIME<input id="missionDate" type="datetime-local"></label>
+            <label>MISSION TYPE<select id="missionType">
+              <option>Troop Transport</option><option>Air Assault</option><option>Logistics / Resupply</option>
+              <option>CASEVAC / MEDEVAC</option><option>Reconnaissance</option><option>Search & Rescue</option>
+            </select></label>
+            <label>ROE / STATUS<select id="roe"><option>TRAINING</option><option>GREEN</option><option>AMBER</option><option>RED</option></select></label>
+            <label class="wide">MISSION NOTES<textarea id="missionNotes" placeholder="Intent, restrictions, coordination notes..."></textarea></label>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">FLIGHT PARAMETERS</div>
+          <div class="form-grid">
+            <label>FLIGHT TYPE<select id="flightType"><option>VFR</option><option>TACTICAL VFR</option><option>FORMATION</option><option>LOW-LEVEL</option></select></label>
+            <label>FORMATION<select id="formation"><option>Single Ship</option><option>Trail</option><option>Combat Spread</option><option>Wedge</option></select></label>
+            <label>CRUISE ALTITUDE<select id="altitude"><option>500 FT AGL</option><option>1,000 FT AGL</option><option>1,500 FT AGL</option><option>2,000 FT AGL</option></select></label>
+            <label>WEATHER<select id="weather"><option>Clear</option><option>Overcast</option><option>Rain</option><option>Fog</option><option>Night / NVG</option></select></label>
+            <label>FUEL / LOAD<select id="loadout"><option>Standard Transport</option><option>Troop Heavy</option><option>Cargo / Resupply</option><option>Medical</option><option>Light / Empty</option></select></label>
+            <label>COMMS PLAN<input id="comms" value="PRIMARY / TAC / GUARD"></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title row-title"><span>ROUTE / WAYPOINTS</span><button id="addWp" class="btn small">+ ADD WAYPOINT</button></div>
+        <div id="waypoints"></div>
+        <div class="route-summary" id="routeSummary">NO WAYPOINTS DEFINED</div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-title">MAP / GRID REFERENCE</div>
+        <div class="mapbox" id="mapbox">
+          <div class="map-grid"></div>
+          <div class="compass">N</div>
+          <div class="map-note">BRM5 planning overlay — enter your in-game grid references above.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="saved" class="section">
+      <div class="page-head"><div><div class="eyebrow">MISSION ARCHIVE / 02</div><h1>Saved Plans</h1></div><button class="btn ghost" id="clearPlans">CLEAR ALL</button></div>
+      <div id="savedList" class="saved-list"></div>
+    </section>
+
+    <section id="brief" class="section">
+      <div class="page-head"><div><div class="eyebrow">BRIEFING CARD / 03</div><h1>Mission Brief</h1></div><button class="btn primary" id="printBrief">PRINT / PDF</button></div>
+      <div id="briefCard" class="brief-card"></div>
+    </section>
+
+    <section id="settings" class="section">
+      <div class="page-head"><div><div class="eyebrow">SYSTEM / 04</div><h1>Settings</h1></div></div>
+      <div class="panel">
+        <div class="panel-title">LOCAL DATA</div>
+        <p class="muted">Saved flight plans are stored locally in this browser using localStorage. They persist on the same browser/device but are not synchronized between devices.</p>
+        <button class="btn danger" id="exportData">EXPORT PLANS JSON</button>
+        <label class="file-btn btn ghost">IMPORT PLANS JSON<input id="importData" type="file" accept=".json"></label>
+      </div>
+      <div class="panel">
+        <div class="panel-title">ABOUT</div>
+        <p class="muted">A community-made BRM5 roleplay planning utility. Not affiliated with Roblox or Platinum Five.</p>
+      </div>
+    </section>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
