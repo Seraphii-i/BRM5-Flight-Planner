@@ -1,10 +1,8 @@
-# BRM5 Aviation Operations Planner v2
+# BRM5 Aviation Operations Planner v1
 
-GitHub Pages-ready static planner using the supplied BRM5 map.
+Static planner using the supplied BRM5 map.
 
 Features: interactive map waypoint placement, grid conversion, route overlay, mission parameters, saved plans via localStorage, printable briefing cards, and JSON-compatible browser persistence.
-
-Upload all files to a GitHub repository and enable GitHub Pages from Settings → Pages → Deploy from branch → main.
 
 Community-made utility; not affiliated with Roblox or Platinum Five.
 
