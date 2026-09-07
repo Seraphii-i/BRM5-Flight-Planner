@@ -1,41 +1,493 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BRM5 // Aviation Operations Planner</title><link rel="stylesheet" href="style.css"></head>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BRM5 Aviation Operations Planner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
 <body>
-<header><div class="brand"><span class="mark">BRM5</span><div><b>AVIATION OPERATIONS</b><small>MISSION PLANNING TERMINAL</small></div></div><div class="live"><i></i> LOCAL DATA // ONLINE</div></header>
-<div class="shell">
-<aside><button class="nav active" data-page="planner">FLIGHT PLANNER</button><button class="nav" data-page="saved">MISSION ARCHIVE <em id="count">0</em></button><button class="nav" data-page="brief">BRIEFING CARD</button>
-<div class="sideblock"><small>AIRCRAFT</small><select id="aircraft">
-<optgroup label="UTILITY"><option>UH-60V 'BLACK HAWK'</option><option>NH90 TTH</option></optgroup>
-<optgroup label="MEDIUM-LIFT"><option>CH-47D 'CHINOOK'</option><option>Mi-8MTV-2 'HIP'</option></optgroup>
-<optgroup label="HEAVY-LIFT"><option>CH-53D 'SEA STALLION'</option></optgroup>
-<optgroup label="LIGHT ASSAULT"><option>MH-6 'LITTLE BIRD'</option></optgroup>
-</select><div class="aircraftmeta" id="aircraftMeta"></div><small>CALLSIGN</small><input id="callsign" value="RAVEN 11"></div>
-</aside>
-<main>
-<section id="planner" class="page active"><div class="head"><div><small>MISSION PLANNING / 01</small><h1>Flight Planner</h1></div><div><button class="btn" id="new">NEW PLAN</button><button class="btn primary" id="save">SAVE PLAN</button></div></div>
-<div class="columns">
-<div>
-<div class="panel"><h2>MISSION DATA</h2><div class="formgrid">
-<label>MISSION NAME<input id="mission" placeholder="OPERATION NAME"></label><label>DATE / TIME<input id="datetime" type="datetime-local"></label>
-<label>MISSION TYPE<select id="type"><option>Troop Transport</option><option>Air Assault</option><option>Logistics / Resupply</option><option>CASEVAC / MEDEVAC</option><option>Reconnaissance</option><option>Search & Rescue</option></select></label>
-<label>STATUS<select id="status"><option>TRAINING</option><option>GREEN</option><option>AMBER</option><option>RED</option></select></label>
-<label class="wide">INTENT / NOTES<textarea id="notes" placeholder="Mission intent, restrictions, coordination..."></textarea></label></div></div>
-<div class="panel"><h2>FLIGHT PARAMETERS</h2><div class="formgrid">
-<label>FLIGHT RULES<select id="rules"><option>VFR</option><option>TACTICAL VFR</option><option>FORMATION</option><option>LOW-LEVEL</option></select></label>
-<label>FORMATION<select id="formation"><option>Single Ship</option><option>Trail</option><option>Combat Spread</option><option>Wedge</option></select></label>
-<label>CRUISE ALTITUDE<select id="alt"><option>500 FT AGL</option><option>1,000 FT AGL</option><option>1,500 FT AGL</option><option>2,000 FT AGL</option></select></label>
-<label>WEATHER<select id="weather"><option>Clear</option><option>Overcast</option><option>Rain</option><option>Fog</option><option>Night / NVG</option></select></label>
-<label>LOAD / CONFIG<select id="load"><option>Standard Transport</option><option>Troop Heavy</option><option>Cargo / Resupply</option><option>Medical</option><option>Light / Empty</option></select></label>
-<label>COMMS PLAN<input id="comms" value="PRIMARY / TAC / GUARD"></label></div></div>
-<div class="panel"><div class="paneltop"><h2>ROUTE / WAYPOINTS</h2><button class="btn mini" id="add">+ WAYPOINT</button></div><div id="wps"></div><div class="route" id="route">NO WAYPOINTS DEFINED</div></div>
-</div>
-<div>
-<div class="panel map-panel"><div class="paneltop"><h2>BRM5 MAP / ROUTE OVERLAY</h2><span class="hint">CLICK MAP TO ADD WAYPOINT</span></div>
-<div class="mapwrap" id="map"><img src="brm5-map.png"><svg id="lines"></svg><div id="pins"></div></div>
-<div class="maptools"><button class="btn mini" id="clearMap">CLEAR ROUTE</button><span>Grid shown: 00–07 east / 00–03 north</span></div></div>
-<div class="panel"><h2>QUICK GRID</h2><p class="help">Map clicks are converted to the BRM5 map grid. Waypoints can also be edited manually below. Use the waypoint action field for DEPART, HOLD, LAND, PICKUP, DROP, RTB, etc.</p></div>
-</div></div></section>
-<section id="saved" class="page"><div class="head"><div><small>MISSION ARCHIVE / 02</small><h1>Saved Plans</h1></div><button class="btn danger" id="clear">CLEAR ALL</button></div><div id="savedList"></div></section>
-<section id="brief" class="page"><div class="head"><div><small>BRIEFING CARD / 03</small><h1>Mission Brief</h1></div><button class="btn primary" onclick="print()">PRINT / PDF</button></div><div id="briefCard"></div></section>
-</main></div><script src="app.js"></script></body></html>
+
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">▲</div>
+      <div class="brand-title">
+        <h1>BRM5 AVIATION OPERATIONS PLANNER</h1>
+        <span class="sub">TACTICAL FLIGHT PLANNING & MISSION TERMINAL</span>
+      </div>
+    </div>
+    
+    <nav class="main-nav" id="mainNav">
+      <button class="nav-btn active" data-tab="planner">FLIGHT PLANNER</button>
+      <button class="nav-btn" data-tab="archive">MISSION ARCHIVE</button>
+      <button class="nav-btn" data-tab="briefing">BRIEFING CARD</button>
+      <button class="nav-btn" data-tab="sorties">SORTIE LOG</button>
+      <button class="nav-btn" data-tab="comms">RADIO / COMMS</button>
+      <button class="nav-btn" data-tab="reference">REFERENCE</button>
+      <button class="nav-btn" data-tab="settings">SETTINGS</button>
+    </nav>
+  </header>
+
+  <main class="app-container">
+
+    <section id="tab-planner" class="tab-content active">
+      <div class="planner-grid">
+        
+        <div class="panel map-panel">
+          <div class="panel-header">
+            <span>OPERATIONAL MAP (BRM5 AO)</span>
+            <div class="map-controls-inline">
+              <label for="locationSelector">PRESET LOC:</label>
+              <select id="locationSelector">
+                <option value="">-- SELECT POI --</option>
+              </select>
+              <button id="clearWaypointsBtn" class="btn btn-danger btn-sm">CLEAR ROUTE</button>
+            </div>
+          </div>
+          <div class="map-wrapper">
+            <canvas id="mapCanvas" width="1000" height="472"></canvas>
+            <div class="map-overlay-info">
+              <span id="cursorGrid">GRID: 00 000 / 00 000</span>
+            </div>
+          </div>
+          <div class="panel-footer-note">
+            CLICK ON MAP TO SET WAYPOINT • DRAG TO ADJUST • DOUBLE CLICK WAYPOINT TO DELETE
+          </div>
+        </div>
+
+        <div class="panel form-panel">
+          <div class="panel-header">MISSION DATA ENTRY</div>
+          
+          <form id="flightPlanForm" onsubmit="return false;">
+            <div class="form-section">
+              <div class="section-title">PRIMARY MISSION INFO</div>
+              <div class="form-grid cols-2">
+                <div class="form-group">
+                  <label>MISSION NAME</label>
+                  <input type="text" id="mName" value="OPERATION NIGHT HAWK" required>
+                </div>
+                <div class="form-group">
+                  <label>CALLSIGN</label>
+                  <input type="text" id="mCallsign" value="RAVEN 11" placeholder="e.g. RAVEN 11" required>
+                </div>
+                <div class="form-group">
+                  <label>DATE</label>
+                  <input type="date" id="mDate">
+                </div>
+                <div class="form-group">
+                  <label>TIME (ZULU / LOCAL)</label>
+                  <input type="text" id="mTime" value="0400 Z">
+                </div>
+                <div class="form-group">
+                  <label>MISSION TYPE</label>
+                  <select id="mType">
+                    <option value="Troop Transport">Troop Transport</option>
+                    <option value="Air Assault" selected>Air Assault</option>
+                    <option value="Logistics / Resupply">Logistics / Resupply</option>
+                    <option value="CASEVAC / MEDEVAC">CASEVAC / MEDEVAC</option>
+                    <option value="Reconnaissance">Reconnaissance</option>
+                    <option value="Search & Rescue">Search & Rescue</option>
+                    <option value="Extraction">Extraction</option>
+                    <option value="General Transport">General Transport</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>DEFCON / STATUS</label>
+                  <select id="mStatus">
+                    <option value="GREEN">GREEN (Low Threat)</option>
+                    <option value="AMBER" selected>AMBER (Medium Threat)</option>
+                    <option value="RED">RED (High Threat)</option>
+                    <option value="TRAINING">TRAINING</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-title">AIRCRAFT SELECTION</div>
+              <div class="form-grid cols-2">
+                <div class="form-group">
+                  <label>AIRFRAME</label>
+                  <select id="mAircraft"></select>
+                </div>
+                <div class="form-group">
+                  <label>CATEGORY / ROLE</label>
+                  <input type="text" id="mAircraftRole" readonly class="readonly-input">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-title">FLIGHT PARAMETERS</div>
+              <div class="form-grid cols-3">
+                <div class="form-group">
+                  <label>FLIGHT RULES</label>
+                  <select id="pRules">
+                    <option value="VFR">VFR</option>
+                    <option value="Tactical VFR" selected>Tactical VFR</option>
+                    <option value="Formation">Formation</option>
+                    <option value="Low Level">Low Level</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>FORMATION</label>
+                  <select id="pFormation">
+                    <option value="Single Ship" selected>Single Ship</option>
+                    <option value="Trail">Trail</option>
+                    <option value="Wedge">Wedge</option>
+                    <option value="Combat Spread">Combat Spread</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label>CRUISE ALT</label>
+                  <input type="text" id="pAlt" value="300 AGL">
+                </div>
+                <div class="form-group">
+                  <label>WEATHER</label>
+                  <input type="text" id="pWeather" value="Clear / Light Wind">
+                </div>
+                <div class="form-group">
+                  <label>VISIBILITY</label>
+                  <input type="text" id="pVisibility" value="10 KM+">
+                </div>
+                <div class="form-group">
+                  <label>LOAD / CONFIG</label>
+                  <input type="text" id="pLoad" value="Full Infantry + Ammo">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-title">COMMUNICATIONS PLAN</div>
+              <div class="form-grid cols-3">
+                <div class="form-group">
+                  <label>PRIMARY FREQ</label>
+                  <input type="text" id="cPrimary" value="CH 01 - 121.50">
+                </div>
+                <div class="form-group">
+                  <label>ALTERNATE FREQ</label>
+                  <input type="text" id="cAlternate" value="CH 02 - 124.80">
+                </div>
+                <div class="form-group">
+                  <label>GUARD / EMERG</label>
+                  <input type="text" id="cGuard" value="243.00 MHz">
+                </div>
+              </div>
+            </div>
+
+            <div class="form-section">
+              <div class="section-title">TACTICAL INTENT & NOTES</div>
+              <div class="form-group">
+                <textarea id="mNotes" rows="3" placeholder="Insert operational objectives, threat assessment, ROE..."></textarea>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="button" id="savePlanBtn" class="btn btn-primary">SAVE FLIGHT PLAN</button>
+              <button type="button" id="resetFormBtn" class="btn btn-secondary">NEW / RESET</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="panel waypoint-panel full-width">
+          <div class="panel-header">
+            <span>ROUTE WAYPOINT SEQUENCE</span>
+            <button id="addWpManualBtn" class="btn btn-secondary btn-sm">+ ADD MANUAL WP</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="data-table" id="waypointTable">
+              <thead>
+                <tr>
+                  <th width="60">WP #</th>
+                  <th width="160">NAME</th>
+                  <th width="180">GRID</th>
+                  <th width="100">ALTITUDE</th>
+                  <th width="100">SPEED</th>
+                  <th width="140">ACTION</th>
+                  <th>NOTES</th>
+                  <th width="80">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody id="waypointTbody">
+                </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section id="tab-archive" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">
+          <span>SAVED FLIGHT PLANS ARCHIVE</span>
+          <div class="archive-controls">
+            <input type="text" id="archiveSearch" placeholder="Filter by Name, Callsign, Airframe...">
+            <select id="archiveSort">
+              <option value="newest">Newest First</option>
+              <option value="oldest">Oldest First</option>
+              <option value="name">Name A-Z</option>
+            </select>
+            <button id="exportAllJson" class="btn btn-secondary btn-sm">EXPORT JSON</button>
+            <label class="btn btn-secondary btn-sm file-upload-label">
+              IMPORT JSON <input type="file" id="importJsonInput" accept=".json" hidden>
+            </label>
+            <button id="deleteAllPlansBtn" class="btn btn-danger btn-sm">DELETE ALL</button>
+          </div>
+        </div>
+        <div id="archiveList" class="archive-grid">
+          </div>
+      </div>
+    </section>
+
+    <section id="tab-briefing" class="tab-content">
+      <div class="briefing-actions no-print">
+        <button id="printBriefingBtn" class="btn btn-primary">PRINT / SAVE TO PDF</button>
+      </div>
+      <div class="briefing-card" id="printableBriefing">
+        <div class="brief-header">
+          <div class="brief-title">FLIGHT MISSION BRIEFING CARD</div>
+          <div class="brief-classification">CONFIDENTIAL // UNCLASSIFIED FOR EXERCISE</div>
+        </div>
+
+        <div class="brief-grid cols-2">
+          <div class="brief-block">
+            <div class="brief-label">MISSION NAME:</div>
+            <div class="brief-val" id="bName">-</div>
+          </div>
+          <div class="brief-block">
+            <div class="brief-label">CALLSIGN:</div>
+            <div class="brief-val" id="bCallsign">-</div>
+          </div>
+          <div class="brief-block">
+            <div class="brief-label">AIRCRAFT / ROLE:</div>
+            <div class="brief-val" id="bAircraft">-</div>
+          </div>
+          <div class="brief-block">
+            <div class="brief-label">MISSION TYPE:</div>
+            <div class="brief-val" id="bType">-</div>
+          </div>
+          <div class="brief-block">
+            <div class="brief-label">DATE / TIME:</div>
+            <div class="brief-val" id="bDateTime">-</div>
+          </div>
+          <div class="brief-block">
+            <div class="brief-label">THREAT STATUS:</div>
+            <div class="brief-val" id="bStatus">-</div>
+          </div>
+        </div>
+
+        <div class="brief-section-head">FLIGHT & ENVIRONMENTAL PARAMETERS</div>
+        <div class="brief-grid cols-3">
+          <div class="brief-block"><span class="brief-label">FLIGHT RULES:</span> <span id="bRules" class="brief-val">-</span></div>
+          <div class="brief-block"><span class="brief-label">FORMATION:</span> <span id="bFormation" class="brief-val">-</span></div>
+          <div class="brief-block"><span class="brief-label">CRUISE ALTITUDE:</span> <span id="bAlt" class="brief-val">-</span></div>
+          <div class="brief-block"><span class="brief-label">WEATHER:</span> <span id="bWeather" class="brief-val">-</span></div>
+          <div class="brief-block"><span class="brief-label">VISIBILITY:</span> <span id="bVis" class="brief-val">-</span></div>
+          <div class="brief-block"><span class="brief-label">LOADOUT:</span> <span id="bLoad" class="brief-val">-</span></div>
+        </div>
+
+        <div class="brief-section-head">COMMUNICATIONS PLAN</div>
+        <div class="brief-grid cols-3">
+          <div class="brief-block"><span class="brief-label">PRIMARY FREQ:</span> <span id="bCommsPri" class="brief-val">-</span></div>
+          <div class="brief-block"><span class="brief-label">ALTERNATE FREQ:</span> <span id="bCommsAlt" class="brief-val">-</span></div>
+          <div class="brief-block"><span class="brief-label">EMERGENCY / GUARD:</span> <span id="bCommsGrd" class="brief-val">-</span></div>
+        </div>
+
+        <div class="brief-section-head">NAVIGATION ROUTE & WAYPOINTS</div>
+        <table class="brief-table">
+          <thead>
+            <tr>
+              <th>WP #</th>
+              <th>NAME</th>
+              <th>GRID COORD</th>
+              <th>ALT</th>
+              <th>SPD</th>
+              <th>ACTION</th>
+              <th>NOTES</th>
+            </tr>
+          </thead>
+          <tbody id="briefWaypointTbody">
+            </tbody>
+        </table>
+
+        <div class="brief-section-head">TACTICAL INTENT & EXECUTION NOTES</div>
+        <div class="brief-notes" id="bNotes">None.</div>
+
+        <div class="brief-footer">
+          <span>BRM5 AVIATION PLANNING SYSTEM</span>
+          <span>PAGE 1 OF 1</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-sorties" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">SORTIE LOG & EXECUTION HISTORY</div>
+        <div class="table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>CALLSIGN</th>
+                <th>MISSION NAME</th>
+                <th>AIRCRAFT</th>
+                <th>TYPE</th>
+                <th>DATE</th>
+                <th>STATUS</th>
+                <th>EXECUTION STATE</th>
+                <th>ACTIONS</th>
+              </tr>
+            </thead>
+            <tbody id="sortieTbody">
+              </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-comms" class="tab-content">
+      <div class="comms-grid">
+        <div class="panel">
+          <div class="panel-header">ROLEPLAY TRANSMISSION TEMPLATES</div>
+          <p class="panel-desc">Standard operating procedures for audio transmission within BRM5 tactical aviation scenarios.</p>
+          <div class="template-list">
+            <div class="template-card">
+              <div class="t-head">DEPARTURE / LIFT-OFF</div>
+              <div class="t-body">"[Callsign], departing [Location], ascending to [Altitude], en route [Waypoint]."</div>
+            </div>
+            <div class="template-card">
+              <div class="t-head">EN ROUTE UPDATE</div>
+              <div class="t-body">"[Callsign], passing [Waypoint Name], grid [Grid], altitude [Alt], ETA LZ [Minutes] minutes."</div>
+            </div>
+            <div class="template-card">
+              <div class="t-head">INBOUND LZ / TWO MINUTES</div>
+              <div class="t-body">"[Callsign], two minutes out from LZ [Name]. Prepare ground forces for insertion."</div>
+            </div>
+            <div class="template-card">
+              <div class="t-head">LANDING / TOUCHDOWN</div>
+              <div class="t-body">"[Callsign], boots on the ground at LZ [Name], executing troop drop."</div>
+            </div>
+            <div class="template-card">
+              <div class="t-head">TROOPS AWAY / EXTRACTION COMPLETE</div>
+              <div class="t-body">"[Callsign], troops away / load secured. Lifting off LZ [Name], RTB."</div>
+            </div>
+            <div class="template-card">
+              <div class="t-head">ABORT / HOT LZ</div>
+              <div class="t-body">"[Callsign], LZ is HOT, taking effective fire! Aborting landing, orbiting grid [Grid]."</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">PROWORDS & BREVITY CODES</div>
+          <div class="table-wrapper">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>PROWORD</th>
+                  <th>MEANING / INTENT</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>ROGER</td><td>I have received and understood your last transmission.</td></tr>
+                <tr><td>WILCO</td><td>I understand your message and will comply with instructions.</td></tr>
+                <tr><td>READ BACK</td><td>Repeat specified portion of message back to sender.</td></tr>
+                <tr><td>SAY AGAIN</td><td>Request repetition of last message. (Do not say "Repeat").</td></tr>
+                <tr><td>STANDBY</td><td>Pause transmission for a moment, waiting on higher priority.</td></tr>
+                <tr><td>AFFIRMATIVE</td><td>Yes / Correct.</td></tr>
+                <tr><td>NEGATIVE</td><td>No / Incorrect.</td></tr>
+                <tr><td>HOT LZ</td><td>Landing zone is actively receiving enemy direct/indirect fire.</td></tr>
+                <tr><td>COLD LZ</td><td>Landing zone is secure and clear of hostile threats.</td></tr>
+                <tr><td>RTB</td><td>Return To Base.</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-reference" class="tab-content">
+      <div class="reference-grid">
+        <div class="panel">
+          <div class="panel-header">NATO PHONETIC ALPHABET</div>
+          <table class="data-table">
+            <thead>
+              <tr><th>LETTER</th><th>PHONETIC</th><th>PRONUNCIATION</th></tr>
+            </thead>
+            <tbody id="natoTable"></tbody>
+          </table>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">MILITARY NUMBER PRONUNCIATION</div>
+          <table class="data-table">
+            <thead>
+              <tr><th>DIGIT</th><th>SPOKEN AS</th></tr>
+            </thead>
+            <tbody id="numberTable"></tbody>
+          </table>
+        </div>
+
+        <div class="panel full-width">
+          <div class="panel-header">AVIATION TERMINOLOGY & GRID SYSTEM</div>
+          <div class="ref-text-block">
+            <h4>BRM5 GRID COORDINATE SYSTEM</h4>
+            <p>The operational map utilizes a standard Easting/Northing coordinate box system. Grid coordinates are expressed as <code>EE XXX / NN YYY</code>, where <code>EE</code> represents the primary Easting column (00-07), <code>NN</code> represents the primary Northing row (00-03), and <code>XXX/YYY</code> represent fine sub-grid positional precision scaled within that cell.</p>
+            
+            <h4>ALTITUDE & NAVIGATION TERMS</h4>
+            <ul>
+              <li><strong>AGL (Above Ground Level):</strong> Altitude relative to the terrain directly beneath the airframe.</li>
+              <li><strong>MSL (Mean Sea Level):</strong> Barometric altitude relative to sea level.</li>
+              <li><strong>Ingress:</strong> The tactical route approach segment leading toward the objective or LZ.</li>
+              <li><strong>Egress:</strong> The departure flight path away from the objective area towards safe airspace or RTB.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tab-settings" class="tab-content">
+      <div class="panel">
+        <div class="panel-header">SYSTEM & DISPLAY CONFIGURATION</div>
+        <div class="settings-form">
+          
+          <div class="setting-item">
+            <label for="setLabels">Show Map Location Labels</label>
+            <input type="checkbox" id="setLabels" checked>
+          </div>
+
+          <div class="setting-item">
+            <label for="setRouteLines">Draw Route Lines Between Waypoints</label>
+            <input type="checkbox" id="setRouteLines" checked>
+          </div>
+
+          <div class="setting-item">
+            <label for="setWpNumbers">Draw Waypoint Sequence Numbers on Map</label>
+            <input type="checkbox" id="setWpNumbers" checked>
+          </div>
+
+          <div class="setting-item">
+            <label for="setCompact">Compact Table View</label>
+            <input type="checkbox" id="setCompact">
+          </div>
+
+          <div class="setting-actions">
+            <button id="resetAppConfigBtn" class="btn btn-secondary">RESET DISPLAY SETTINGS</button>
+            <button id="purgeStorageBtn" class="btn btn-danger">CLEAR ALL LOCALSTORAGE DATA</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="app-footer">
+    <span>BRM5 AVIATION OPERATIONS PLANNER • COMMUNITY ROLEPLAY TOOL</span>
+    <span>NOT AFFILIATED WITH ROBLOX OR BRM5 DEVELOPERS</span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
