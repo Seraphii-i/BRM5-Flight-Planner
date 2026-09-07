@@ -15,18 +15,18 @@ const BRM5_AIRCRAFT = [
 ];
 
 const BRM5_LOCATIONS = [
-  { name: "Forward Operating Base", x: 375, y: 242 },
-  { name: "Mountain Radar Station", x: 422, y: 88 },
-  { name: "Bunker", x: 508, y: 62 },
-  { name: "Department of Utilities", x: 535, y: 124 },
-  { name: "Lesdolina", x: 486, y: 200 },
-  { name: "Fort Ronograd", x: 673, y: 165 },
-  { name: "Ronograd City", x: 588, y: 275 },
-  { name: "Ronograd Naval Base", x: 651, y: 310 },
-  { name: "Sochraina City", x: 483, y: 350 },
-  { name: "Kozlovka", x: 300, y: 362 },
-  { name: "Depot", x: 288, y: 430 },
-  { name: "Pushkino", x: 395, y: 412 }
+  { name: "Forward Operating Base", x: 175, y: 440 },
+  { name: "Mountain Radar Station", x: 550, y: 70 },
+  { name: "Bunker", x: 535, y: 220 },
+  { name: "Department of Utilities", x: 560, y: 480 },
+  { name: "Lesdolina", x: 490, y: 515 },
+  { name: "Fort Ronograd", x: 910, y: 380 },
+  { name: "Ronograd City", x: 740, y: 500 },
+  { name: "Ronograd Naval Base", x: 830, y: 620 },
+  { name: "Sochraina City", x: 445, y: 755 },
+  { name: "Kozlovka", x: 100, y: 800 },
+  { name: "Depot", x: 60, y: 920 },
+  { name: "Pushkino", x: 280, y: 880 }
 ];
 
 const ACTION_OPTIONS = [
@@ -238,27 +238,18 @@ function bindFormInputs() {
 // --- GRID CONVERSION MATH ---
 
 function canvasToGrid(x, y) {
-  // Map dimensions: 1000 x 472
-  // Map grid boundaries:
-  // Easting (00 - 07): starts at x ≈ 252px (00 mark) and ends at x ≈ 935px (07 mark)
-  // Northing (00 - 03): starts at y ≈ 462px (00 line) and ends at y ≈ 35px (03 line)
+  // Uses normalized canvas dimensions to generate 00-07 Easting and 00-03 Northing
+  const canvas = document.getElementById("mapCanvas");
+  const width = canvas.width || 1000;
+  const height = canvas.height || 1000;
 
-  const leftEdge = 252;
-  const rightEdge = 935;
-  const bottomEdge = 462;
-  const topEdge = 35;
+  const eVal = (x / width) * 7;
+  const nVal = ((height - y) / height) * 3; // Inverted Y axis for Northing
 
-  // Normalized ratios bounded between grid extremes
-  const eNormalized = Math.max(0, Math.min(1, (x - leftEdge) / (rightEdge - leftEdge)));
-  const nNormalized = Math.max(0, Math.min(1, (bottomEdge - y) / (bottomEdge - topEdge)));
-
-  const eVal = eNormalized * 7;
-  const nVal = nNormalized * 3;
-
-  const eMajor = String(Math.floor(eVal)).padStart(2, '0');
+  const eMajor = String(Math.floor(Math.max(0, Math.min(6, eVal)))).padStart(2, '0');
   const eMinor = String(Math.floor((eVal % 1) * 1000)).padStart(3, '0');
 
-  const nMajor = String(Math.floor(nVal)).padStart(2, '0');
+  const nMajor = String(Math.floor(Math.max(0, Math.min(2, nVal)))).padStart(2, '0');
   const nMinor = String(Math.floor((nVal % 1) * 1000)).padStart(3, '0');
 
   return `${eMajor} ${eMinor} / ${nMajor} ${nMinor}`;
@@ -331,47 +322,109 @@ function redrawMap() {
   const canvas = document.getElementById("mapCanvas");
   const ctx = canvas.getContext("2d");
 
+  // Ensure canvas is square to match raw image aspect ratio (e.g. 1000x1000)
+  canvas.width = 1000;
+  canvas.height = 1000;
+
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Render Background Map
+  // 1. Draw Raw Satellite Terrain
   if (mapImage.complete && mapImage.naturalWidth !== 0) {
     ctx.drawImage(mapImage, 0, 0, canvas.width, canvas.height);
   } else {
-    // Tactical Fallback Canvas Fill
-    ctx.fillStyle = "#121614";
+    ctx.fillStyle = "#0c0e0f";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.fillStyle = "#3a443f";
-    ctx.font = "14px monospace";
-    ctx.fillText("BRM5 MAP IMAGE [assets/brm5-map.png] NOT LOADED - USING TACTICAL GRID", 200, 236);
   }
 
-  // Draw Grid Overlay
-  ctx.strokeStyle = "rgba(112, 130, 56, 0.25)";
+  // 2. Draw Dynamic Tactical Grid Lines
+  ctx.strokeStyle = "rgba(112, 130, 56, 0.35)";
   ctx.lineWidth = 1;
-  for (let x = 0; x <= canvas.width; x += canvas.width / 7) {
-    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, canvas.height); ctx.stroke();
-  }
-  for (let y = 0; y <= canvas.height; y += canvas.height / 3) {
-    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(canvas.width, y); ctx.stroke();
+  ctx.font = "bold 11px monospace";
+  ctx.fillStyle = "rgba(180, 200, 150, 0.75)";
+
+  const cols = 7;
+  const rows = 3;
+
+  // Vertical Grid Lines (Easting 00 - 07)
+  for (let i = 0; i <= cols; i++) {
+    const x = (canvas.width / cols) * i;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x, canvas.height);
+    ctx.stroke();
+
+    if (i < cols) {
+      ctx.fillText(`0${i}`, x + 6, 16);
+    }
   }
 
-  // Draw Map Locations
+  // Horizontal Grid Lines (Northing 00 - 03)
+  for (let j = 0; j <= rows; j++) {
+    const y = (canvas.height / rows) * j;
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(canvas.width, y);
+    ctx.stroke();
+
+    if (j < rows) {
+      ctx.fillText(`0${rows - 1 - j}`, 8, y + 16);
+    }
+  }
+
+  // 3. Draw Compass Rose (Bottom Right)
+  const cx = 930;
+  const cy = 930;
+  ctx.strokeStyle = "rgba(200, 210, 200, 0.5)";
+  ctx.lineWidth = 1.5;
+
+  ctx.beginPath();
+  ctx.arc(cx, cy, 25, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Crosshairs
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - 32); ctx.lineTo(cx, cy + 32);
+  ctx.moveTo(cx - 32, cy); ctx.lineTo(cx + 32, cy);
+  ctx.stroke();
+
+  // Cardinal Labels
+  ctx.fillStyle = "#f3f4f6";
+  ctx.font = "bold 10px monospace";
+  ctx.textAlign = "center";
+  ctx.fillText("N", cx, cy - 36);
+  ctx.fillText("S", cx, cy + 44);
+  ctx.fillText("W", cx - 40, cy + 3);
+  ctx.fillText("E", cx + 40, cy + 3);
+
+  // 4. Draw Map Locations
   if (settings.showLabels) {
-    ctx.fillStyle = "rgba(200, 210, 200, 0.6)";
-    ctx.font = "9px -apple-system, sans-serif";
     BRM5_LOCATIONS.forEach(loc => {
+      ctx.strokeStyle = "#d97706";
+      ctx.fillStyle = "#d97706";
+      ctx.lineWidth = 1.5;
+
+      // Location Diamond Icon
       ctx.beginPath();
-      ctx.arc(loc.x, loc.y, 3, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillText(loc.name.toUpperCase(), loc.x + 6, loc.y + 3);
+      ctx.moveTo(loc.x, loc.y - 4);
+      ctx.lineTo(loc.x + 4, loc.y);
+      ctx.lineTo(loc.x, loc.y + 4);
+      ctx.lineTo(loc.x - 4, loc.y);
+      ctx.closePath();
+      ctx.stroke();
+
+      // Label Text
+      ctx.textAlign = "left";
+      ctx.fillStyle = "#f3f4f6";
+      ctx.font = "10px monospace";
+      ctx.fillText(loc.name.toUpperCase(), loc.x + 7, loc.y + 3);
     });
   }
 
-  // Draw Route Lines
+  // 5. Draw Waypoint Route Lines
   if (settings.showRouteLines && currentPlan.waypoints.length > 1) {
     ctx.strokeStyle = "#708238";
     ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]);
+    ctx.setLineDash([5, 5]);
     ctx.beginPath();
     ctx.moveTo(currentPlan.waypoints[0].x, currentPlan.waypoints[0].y);
     for (let i = 1; i < currentPlan.waypoints.length; i++) {
@@ -381,30 +434,30 @@ function redrawMap() {
     ctx.setLineDash([]);
   }
 
-  // Draw Waypoints
+  // 6. Draw Waypoint Markers
   currentPlan.waypoints.forEach((wp, idx) => {
-    ctx.fillStyle = "#d97706";
+    ctx.fillStyle = "#dc2626";
     ctx.strokeStyle = "#ffffff";
     ctx.lineWidth = 1.5;
 
     ctx.beginPath();
-    ctx.arc(wp.x, wp.y, 7, 0, Math.PI * 2);
+    ctx.arc(wp.x, wp.y, 8, 0, Math.PI * 2);
     ctx.fill();
     ctx.stroke();
 
     if (settings.showWpNumbers) {
       ctx.fillStyle = "#ffffff";
-      ctx.font = "bold 9px monospace";
+      ctx.font = "bold 10px monospace";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText(String(idx + 1), wp.x, wp.y);
     }
 
-    // Label Text
     ctx.textAlign = "left";
-    ctx.fillStyle = "#f3f4f6";
-    ctx.font = "bold 10px monospace";
-    ctx.fillText(`${wp.name}`, wp.x + 10, wp.y - 2);
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "bold 11px monospace";
+    ctx.fillText(wp.name, wp.x + 11, wp.y + 3);
   });
 }
 
