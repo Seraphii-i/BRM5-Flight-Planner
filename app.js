@@ -15,18 +15,18 @@ const BRM5_AIRCRAFT = [
 ];
 
 const BRM5_LOCATIONS = [
-  { name: "Mountain Radar Station", x: 215, y: 110 },
-  { name: "Bunker", x: 410, y: 135 },
-  { name: "Department of Utilities", x: 530, y: 190 },
-  { name: "Fort Ronograd", x: 680, y: 160 },
-  { name: "Lesdolina", x: 290, y: 240 },
-  { name: "Ronograd City", x: 740, y: 280 },
-  { name: "Ronograd Naval Base", x: 880, y: 310 },
-  { name: "Sochraina City", x: 150, y: 350 },
-  { name: "Kozlovka", x: 340, y: 360 },
-  { name: "Depot", x: 490, y: 310 },
-  { name: "Pushkino", x: 580, y: 400 },
-  { name: "Forward Operating Base", x: 420, y: 270 }
+  { name: "Forward Operating Base", x: 375, y: 242 },
+  { name: "Mountain Radar Station", x: 422, y: 88 },
+  { name: "Bunker", x: 508, y: 62 },
+  { name: "Department of Utilities", x: 535, y: 124 },
+  { name: "Lesdolina", x: 486, y: 200 },
+  { name: "Fort Ronograd", x: 673, y: 165 },
+  { name: "Ronograd City", x: 588, y: 275 },
+  { name: "Ronograd Naval Base", x: 651, y: 310 },
+  { name: "Sochraina City", x: 483, y: 350 },
+  { name: "Kozlovka", x: 300, y: 362 },
+  { name: "Depot", x: 288, y: 430 },
+  { name: "Pushkino", x: 395, y: 412 }
 ];
 
 const ACTION_OPTIONS = [
