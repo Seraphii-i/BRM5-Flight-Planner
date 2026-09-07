@@ -238,10 +238,22 @@ function bindFormInputs() {
 // --- GRID CONVERSION MATH ---
 
 function canvasToGrid(x, y) {
-  // BRM5 Canvas Bounds: 1000 x 472
-  // Easting: 00 to 07, Northing: 00 to 03
-  const eVal = (x / 1000) * 7;
-  const nVal = ((472 - y) / 472) * 3; // Inverted Y for standard northing
+  // Map dimensions: 1000 x 472
+  // Map grid boundaries:
+  // Easting (00 - 07): starts at x ≈ 252px (00 mark) and ends at x ≈ 935px (07 mark)
+  // Northing (00 - 03): starts at y ≈ 462px (00 line) and ends at y ≈ 35px (03 line)
+
+  const leftEdge = 252;
+  const rightEdge = 935;
+  const bottomEdge = 462;
+  const topEdge = 35;
+
+  // Normalized ratios bounded between grid extremes
+  const eNormalized = Math.max(0, Math.min(1, (x - leftEdge) / (rightEdge - leftEdge)));
+  const nNormalized = Math.max(0, Math.min(1, (bottomEdge - y) / (bottomEdge - topEdge)));
+
+  const eVal = eNormalized * 7;
+  const nVal = nNormalized * 3;
 
   const eMajor = String(Math.floor(eVal)).padStart(2, '0');
   const eMinor = String(Math.floor((eVal % 1) * 1000)).padStart(3, '0');
