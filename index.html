@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BRM5 // Aviation Operations Planner</title><link rel="stylesheet" href="style.css"></head>
+<body>
+<header><div class="brand"><span class="mark">BRM5</span><div><b>AVIATION OPERATIONS</b><small>MISSION PLANNING TERMINAL</small></div></div><div class="live"><i></i> LOCAL DATA // ONLINE</div></header>
+<div class="shell">
+<aside><button class="nav active" data-page="planner">FLIGHT PLANNER</button><button class="nav" data-page="saved">MISSION ARCHIVE <em id="count">0</em></button><button class="nav" data-page="brief">BRIEFING CARD</button>
+<div class="sideblock"><small>AIRCRAFT</small><select id="aircraft">
+<optgroup label="UTILITY"><option>UH-60V 'BLACK HAWK'</option><option>NH90 TTH</option></optgroup>
+<optgroup label="MEDIUM-LIFT"><option>CH-47D 'CHINOOK'</option><option>Mi-8MTV-2 'HIP'</option></optgroup>
+<optgroup label="HEAVY-LIFT"><option>CH-53D 'SEA STALLION'</option></optgroup>
+<optgroup label="LIGHT ASSAULT"><option>MH-6 'LITTLE BIRD'</option></optgroup>
+</select><div class="aircraftmeta" id="aircraftMeta"></div><small>CALLSIGN</small><input id="callsign" value="RAVEN 11"></div>
+</aside>
+<main>
+<section id="planner" class="page active"><div class="head"><div><small>MISSION PLANNING / 01</small><h1>Flight Planner</h1></div><div><button class="btn" id="new">NEW PLAN</button><button class="btn primary" id="save">SAVE PLAN</button></div></div>
+<div class="columns">
+<div>
+<div class="panel"><h2>MISSION DATA</h2><div class="formgrid">
+<label>MISSION NAME<input id="mission" placeholder="OPERATION NAME"></label><label>DATE / TIME<input id="datetime" type="datetime-local"></label>
+<label>MISSION TYPE<select id="type"><option>Troop Transport</option><option>Air Assault</option><option>Logistics / Resupply</option><option>CASEVAC / MEDEVAC</option><option>Reconnaissance</option><option>Search & Rescue</option></select></label>
+<label>STATUS<select id="status"><option>TRAINING</option><option>GREEN</option><option>AMBER</option><option>RED</option></select></label>
+<label class="wide">INTENT / NOTES<textarea id="notes" placeholder="Mission intent, restrictions, coordination..."></textarea></label></div></div>
+<div class="panel"><h2>FLIGHT PARAMETERS</h2><div class="formgrid">
+<label>FLIGHT RULES<select id="rules"><option>VFR</option><option>TACTICAL VFR</option><option>FORMATION</option><option>LOW-LEVEL</option></select></label>
+<label>FORMATION<select id="formation"><option>Single Ship</option><option>Trail</option><option>Combat Spread</option><option>Wedge</option></select></label>
+<label>CRUISE ALTITUDE<select id="alt"><option>500 FT AGL</option><option>1,000 FT AGL</option><option>1,500 FT AGL</option><option>2,000 FT AGL</option></select></label>
+<label>WEATHER<select id="weather"><option>Clear</option><option>Overcast</option><option>Rain</option><option>Fog</option><option>Night / NVG</option></select></label>
+<label>LOAD / CONFIG<select id="load"><option>Standard Transport</option><option>Troop Heavy</option><option>Cargo / Resupply</option><option>Medical</option><option>Light / Empty</option></select></label>
+<label>COMMS PLAN<input id="comms" value="PRIMARY / TAC / GUARD"></label></div></div>
+<div class="panel"><div class="paneltop"><h2>ROUTE / WAYPOINTS</h2><button class="btn mini" id="add">+ WAYPOINT</button></div><div id="wps"></div><div class="route" id="route">NO WAYPOINTS DEFINED</div></div>
+</div>
+<div>
+<div class="panel map-panel"><div class="paneltop"><h2>BRM5 MAP / ROUTE OVERLAY</h2><span class="hint">CLICK MAP TO ADD WAYPOINT</span></div>
+<div class="mapwrap" id="map"><img src="brm5-map.png"><svg id="lines"></svg><div id="pins"></div></div>
+<div class="maptools"><button class="btn mini" id="clearMap">CLEAR ROUTE</button><span>Grid shown: 00–07 east / 00–03 north</span></div></div>
+<div class="panel"><h2>QUICK GRID</h2><p class="help">Map clicks are converted to the BRM5 map grid. Waypoints can also be edited manually below. Use the waypoint action field for DEPART, HOLD, LAND, PICKUP, DROP, RTB, etc.</p></div>
+</div></div></section>
+<section id="saved" class="page"><div class="head"><div><small>MISSION ARCHIVE / 02</small><h1>Saved Plans</h1></div><button class="btn danger" id="clear">CLEAR ALL</button></div><div id="savedList"></div></section>
+<section id="brief" class="page"><div class="head"><div><small>BRIEFING CARD / 03</small><h1>Mission Brief</h1></div><button class="btn primary" onclick="print()">PRINT / PDF</button></div><div id="briefCard"></div></section>
+</main></div><script src="app.js"></script></body></html>
